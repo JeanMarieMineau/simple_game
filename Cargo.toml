@@ -1,5 +1,5 @@
 [package]
-name = "simpleGame"
+name = "simple_game"
 version = "0.1.0"
 authors = ["Mineau Jean-Marie <mineau.jean.marie@gmail.com>"]
 edition = "2018"
