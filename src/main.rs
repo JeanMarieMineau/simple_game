@@ -6,6 +6,8 @@ use sdl2::rect::{Point, Rect};
 use sdl2::image::{self, LoadTexture, InitFlag};
 use std::time::Duration;
 
+const PLAYER_SPEED: i32 = 5;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Direction {
     Up,
@@ -20,9 +22,13 @@ struct Player {
     sprite: Rect,
     direction: Direction,
     next_frame: i32,
+    speed: i32,
 }
 
-fn update_player(player: &mut Player){
+/// Update the player current frame.
+/// This function is to be called only once on each iteration
+/// of the main loop.
+fn update_player_frame(player: &mut Player){
     player.sprite = Rect::new(
         (player.next_frame / 5) * 94,
         direction_to_spritesheet_row(player.direction) * 100,
@@ -31,6 +37,19 @@ fn update_player(player: &mut Player){
     );
     player.next_frame += 1;
     player.next_frame %= 3 * 5;
+}
+
+/// Update the player speed.
+/// This function is to be called only once on each iteration
+/// of the main loop.
+fn update_player(player: &mut Player){
+    use self::Direction::*;
+    player.position = match player.direction {
+        Up => player.position.offset(0, -player.speed),
+        Down => player.position.offset(0, player.speed),
+        Left => player.position.offset(-player.speed, 0),
+        Right => player.position.offset(player.speed, 0),
+    };
 }
 
 /// Returns the row of the spritesheet corresponding to the given direction
@@ -92,9 +111,10 @@ pub fn main() -> Result<(), String> {
         sprite: Rect::new(0, 0, 94, 100),
         direction: Direction::Down,
         next_frame: 0,
+        speed: 0,
     };
 
-    update_player(&mut player);
+    update_player_frame(&mut player);
     render(
         &mut canvas,
         Color::RGB(0, 255, 255),
@@ -120,7 +140,7 @@ pub fn main() -> Result<(), String> {
                     ..
                 } => {
                     player.direction = Direction::Up;
-                    update_player(&mut player);
+                    player.speed = PLAYER_SPEED;
                 },
                 Event::KeyDown {
                     keycode: Some(Keycode::Down),
@@ -128,7 +148,7 @@ pub fn main() -> Result<(), String> {
                     ..
                 } => {
                     player.direction = Direction::Down;
-                    update_player(&mut player);
+                    player.speed = PLAYER_SPEED;
                 },
                 Event::KeyDown {
                     keycode: Some(Keycode::Left),
@@ -136,7 +156,7 @@ pub fn main() -> Result<(), String> {
                     ..
                 } => {
                     player.direction = Direction::Left;
-                    update_player(&mut player);
+                    player.speed = PLAYER_SPEED;
                 },
                 Event::KeyDown {
                     keycode: Some(Keycode::Right),
@@ -144,12 +164,32 @@ pub fn main() -> Result<(), String> {
                     ..
                 } => {
                     player.direction = Direction::Right;
-                    update_player(&mut player);
+                    player.speed = PLAYER_SPEED;
+                },
+                Event::KeyUp {
+                    keycode: Some(Keycode::Up),
+                    repeat: false,
+                    ..
+                } | Event::KeyUp {
+                    keycode: Some(Keycode::Down),
+                    repeat: false,
+                    ..
+                } | Event::KeyUp {
+                    keycode: Some(Keycode::Left),
+                    repeat: false,
+                    ..
+                } | Event::KeyUp {
+                    keycode: Some(Keycode::Right),
+                    repeat: false,
+                    ..
+                } => {
+                    player.speed = 0;
                 },
                 _ => {}
             }
         }
         // The rest of the game loop goes here...
+        update_player_frame(&mut player);
         update_player(&mut player);
         render(
             &mut canvas,
