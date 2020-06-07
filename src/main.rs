@@ -30,13 +30,18 @@ struct Player {
 /// of the main loop.
 fn update_player_frame(player: &mut Player){
     player.sprite = Rect::new(
-        (player.next_frame / 5) * 94,
-        direction_to_spritesheet_row(player.direction) * 100,
-        94,
-        100,
+        //(player.next_frame / 5) * 94,
+        (player.next_frame / 3) * 72,
+        //direction_to_spritesheet_row(player.direction) * 100,
+        direction_to_spritesheet_row(player.direction) * 102,
+        //94,
+        72,
+        //100,
+        102,
     );
     player.next_frame += 1;
-    player.next_frame %= 3 * 5;
+    //player.next_frame %= 3 * 5;
+    player.next_frame %= 12 * 3;
 }
 
 /// Update the player speed.
@@ -56,13 +61,18 @@ fn update_player(player: &mut Player){
 fn direction_to_spritesheet_row(direction: Direction) -> i32 {
     use self::Direction::*;
     match direction {
-        Up => 3,
+        //Up => 3,
+        //Down => 0,
+        //Left => 1,
+        //Right => 2,
+        Up => 0,
         Down => 0,
         Left => 1,
-        Right => 2,
+        Right => 0,
     }
 }
 
+/// Render the window.
 fn render(
     canvas: &mut WindowCanvas,
     color: Color,
@@ -102,13 +112,15 @@ pub fn main() -> Result<(), String> {
         .unwrap();
 
     let texture_creator = canvas.texture_creator();
-    let texture = texture_creator.load_texture("assets/raptor.png")?;
+    //let texture = texture_creator.load_texture("assets/raptor.png")?;
+    let texture = texture_creator.load_texture("assets/sky-sheet.png")?;
 
     let (width, height) = canvas.output_size()?;
 
     let mut player = Player {
         position: Point::new(width as i32 / 2,  height as i32 / 2),
-        sprite: Rect::new(0, 0, 94, 100),
+        //sprite: Rect::new(0, 0, 94, 100),
+        sprite: Rect::new(0, 0, 72, 102),
         direction: Direction::Down,
         next_frame: 0,
         speed: 0,
